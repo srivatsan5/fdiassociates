@@ -1,0 +1,36 @@
+// Firebase Configuration for FDI Associates
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getStorage } from "firebase/storage";
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyC0gGX2CTU2BsOPp4_4EkS3Zv1hlenFxgE",
+    authDomain: "fdiassociates.firebaseapp.com",
+    projectId: "fdiassociates",
+    storageBucket: "fdiassociates.firebasestorage.app",
+    messagingSenderId: "389572955700",
+    appId: "1:389572955700:web:ec444ca81a348d5abf4461",
+    measurementId: "G-GQ0D9GG24L"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Initialize Firestore
+export const db = getFirestore(app);
+
+// Initialize Auth
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+
+// Initialize Storage
+export const storage = getStorage(app);
+
+// Configure Google provider for better UX
+googleProvider.setCustomParameters({
+    prompt: 'select_account'
+});
+
+export default app;

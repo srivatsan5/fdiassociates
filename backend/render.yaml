@@ -1,0 +1,17 @@
+# Render.com Deployment Configuration
+# This file tells Render how to deploy your backend
+
+services:
+  - type: web
+    name: fdi-associates-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DATABASE
+        value: fdi_associates
+      - key: ALLOWED_ORIGINS
+        sync: false
