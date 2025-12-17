@@ -9,8 +9,8 @@ const { MongoClient, ObjectId } = require('mongodb');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI;
+// MongoDB Connection - Accept both MONGODB_URI and MONGODB_URL
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGODB_URL;
 const DATABASE_NAME = process.env.MONGODB_DATABASE || 'fdi_associates';
 
 let db = null;
@@ -18,7 +18,14 @@ let client = null;
 
 // Connect to MongoDB
 async function connectDB() {
+    if (!MONGODB_URI) {
+        console.error('❌ MONGODB_URI or MONGODB_URL environment variable is not set!');
+        console.error('Please set MONGODB_URI in your environment variables.');
+        return false;
+    }
+
     try {
+        console.log('🔄 Connecting to MongoDB...');
         client = new MongoClient(MONGODB_URI);
         await client.connect();
         db = client.db(DATABASE_NAME);
