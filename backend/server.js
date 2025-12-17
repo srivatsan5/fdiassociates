@@ -26,28 +26,37 @@ async function connectDB() {
 
     try {
         console.log('🔄 Connecting to MongoDB...');
-        console.log('📍 URI starts with:', MONGODB_URI.substring(0, 20) + '...');
+        console.log('📍 URI length:', MONGODB_URI.length);
+        console.log('📍 URI format check:', MONGODB_URI.startsWith('mongodb') ? 'Valid' : 'Invalid');
 
-        // MongoDB connection options for better compatibility with Render
-        const options = {
-            tls: true,
-            tlsAllowInvalidCertificates: false,
-            retryWrites: true,
-            w: 'majority',
-            maxPoolSize: 10,
+        // Simplified connection - let MongoDB driver handle TLS automatically
+        client = new MongoClient(MONGODB_URI, {
             serverSelectionTimeoutMS: 30000,
             connectTimeoutMS: 30000,
-        };
+            socketTimeoutMS: 45000,
+        });
 
-        client = new MongoClient(MONGODB_URI, options);
         await client.connect();
+
+        // Verify connection
+        await client.db('admin').command({ ping: 1 });
+
         db = client.db(DATABASE_NAME);
         console.log('✅ Connected to MongoDB Atlas!');
         console.log(`📦 Database: ${DATABASE_NAME}`);
         return true;
     } catch (error) {
         console.error('❌ MongoDB connection error:', error.message);
-        console.error('Full error:', error);
+
+        // Provide helpful debugging info
+        if (error.message.includes('SSL') || error.message.includes('TLS')) {
+            console.error('💡 This appears to be an SSL/TLS issue.');
+            console.error('💡 Try updating your connection string to include: ?tls=true&tlsInsecure=true');
+        }
+        if (error.message.includes('authentication')) {
+            console.error('💡 Check your username and password in the connection string.');
+        }
+
         return false;
     }
 }
