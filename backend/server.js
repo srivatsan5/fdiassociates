@@ -26,7 +26,20 @@ async function connectDB() {
 
     try {
         console.log('🔄 Connecting to MongoDB...');
-        client = new MongoClient(MONGODB_URI);
+        console.log('📍 URI starts with:', MONGODB_URI.substring(0, 20) + '...');
+
+        // MongoDB connection options for better compatibility with Render
+        const options = {
+            tls: true,
+            tlsAllowInvalidCertificates: false,
+            retryWrites: true,
+            w: 'majority',
+            maxPoolSize: 10,
+            serverSelectionTimeoutMS: 30000,
+            connectTimeoutMS: 30000,
+        };
+
+        client = new MongoClient(MONGODB_URI, options);
         await client.connect();
         db = client.db(DATABASE_NAME);
         console.log('✅ Connected to MongoDB Atlas!');
@@ -34,6 +47,7 @@ async function connectDB() {
         return true;
     } catch (error) {
         console.error('❌ MongoDB connection error:', error.message);
+        console.error('Full error:', error);
         return false;
     }
 }
