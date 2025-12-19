@@ -1,5 +1,5 @@
 // Vercel Serverless Function - MongoDB Connection Helper
-const { MongoClient } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
 let cachedClient = null;
 let cachedDb = null;
@@ -15,25 +15,29 @@ async function connectToDatabase() {
         throw new Error('MONGODB_URI environment variable is not set');
     }
 
-    // Connection options to fix SSL/TLS issues
+    // Use MongoDB recommended connection options for Atlas
     const options = {
-        // SSL/TLS settings
-        tls: true,
-        tlsInsecure: true, // Allow self-signed certs (helps with some environments)
-
-        // Connection settings
+        serverApi: {
+            version: ServerApiVersion.v1,
+            strict: true,
+            deprecationErrors: true,
+        },
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 30000,
         connectTimeoutMS: 30000,
-        socketTimeoutMS: 45000,
-
-        // Required for Atlas
-        retryWrites: true,
-        w: 'majority'
     };
 
     const client = new MongoClient(uri, options);
-    await client.connect();
+
+    try {
+        await client.connect();
+        // Verify connection with ping
+        await client.db("admin").command({ ping: 1 });
+        console.log("Successfully connected to MongoDB!");
+    } catch (error) {
+        console.error("MongoDB connection error:", error);
+        throw error;
+    }
 
     const db = client.db(process.env.MONGODB_DATABASE || 'fdi_associates');
 
